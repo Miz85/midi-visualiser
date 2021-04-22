@@ -1,0 +1,26 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 600px;
+  min-width: 800px;
+}
+
+.controls {
+  margin: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.controls button {
+  width: 70px;
+  margin-right: 15px;
+}
+
+.timing {
+  color: white;
+  margin-left: 20px;
+}
