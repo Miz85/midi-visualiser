@@ -1,25 +1,22 @@
 {
-  "name": "nextjs",
+  "name": "midi-visualiser",
   "version": "1.0.0",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
-    "post-update": "yarn upgrade --latest"
+    "dev": "./node_modules/.bin/next",
+    "build": "./node_modules/.bin/next build",
+    "start": "./node_modules/.bin/next start"
   },
   "dependencies": {
     "@tonejs/midi": "2.0.27",
+    "@tonejs/piano": "^0.2.1",
     "d3-scale": "3.3.0",
     "konva": "7.2.5",
     "next": "latest",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-konva": "17.0.2-0",
-    "tone": "14.7.77"
+    "tone": "14.7.77",
+    "webmidi": "^2.5.2"
   },
-  "license": "MIT",
-  "keywords": [
-    "next"
-  ],
-  "description": "A \"Hello World\" application with multiple pages that shows how Next.js routing works."
+  "license": "MIT"
 }
