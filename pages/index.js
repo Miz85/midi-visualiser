@@ -1,11 +1,11 @@
-import styles from "./index.module.css";
-import { Midi } from "@tonejs/midi";
-import * as Tone from "tone";
-import { useEffect, useState, useRef } from "react";
-import { scaleLinear } from "d3-scale";
-import { PianoKeyboard } from "../components/PianoKeyboard";
-import { scalePiano } from "../lib/piano-scale";
-import { Stage, Layer, Rect, Line } from "react-konva";
+import styles from './index.module.css';
+import { Midi } from '@tonejs/midi';
+import * as Tone from 'tone';
+import { useEffect, useState, useRef } from 'react';
+import { scaleLinear } from 'd3-scale';
+import { PianoKeyboard } from '../components/PianoKeyboard';
+import { scalePiano } from '../lib/piano-scale';
+import { Stage, Layer, Rect, Line } from 'react-konva';
 
 function formatDurationPart(num) {
   return num < 10 ? `0${num}` : `${num}`;
@@ -36,48 +36,48 @@ export default function Home() {
     async function convertMidi() {
       // const midi = await Midi.fromUrl("pachelbels-canon-arranged.mid");
       //const midi = await Midi.fromUrl("Closure.mid");
-      const midi = await Midi.fromUrl("24884_Back-to-the-Future.mid");
+      const midi = await Midi.fromUrl('24884_Back-to-the-Future.mid');
       Tone.Transport.bpm.value = 220;
 
       setMidiMetadata(midi);
     }
-    if (!midiMetadata && typeof window !== "undefined") {
+    if (!midiMetadata && typeof window !== 'undefined') {
       if (!synth.current) {
         // synth.current = new Tone.PolySynth().toDestination();
       }
-      const reverb = new Tone.Reverb({ decay: 10, wet: 0.5 }).toDestination();
+      const reverb = new Tone.Reverb({ decay: 10, wet: 0.3 }).toDestination();
       const _sampler = new Tone.Sampler({
         urls: {
-          A1: "A1.mp3",
-          A2: "A2.mp3",
-          A3: "A3.mp3",
-          A4: "A4.mp3",
-          A5: "A5.mp3",
-          A6: "A6.mp3",
-          A7: "A7.mp3",
-          C1: "C1.mp3",
-          C2: "C2.mp3",
-          C3: "C3.mp3",
-          C4: "C4.mp3",
-          C5: "C5.mp3",
-          C6: "C6.mp3",
-          C7: "C7.mp3",
-          "D#1": "Ds1.mp3",
-          "D#2": "Ds2.mp3",
-          "D#3": "Ds3.mp3",
-          "D#4": "Ds4.mp3",
-          "D#5": "Ds5.mp3",
-          "D#6": "Ds6.mp3",
-          "D#7": "Ds7.mp3",
-          "F#1": "Fs1.mp3",
-          "F#2": "Fs2.mp3",
-          "F#3": "Fs3.mp3",
-          "F#4": "Fs4.mp3",
-          "F#5": "Fs5.mp3",
-          "F#6": "Fs6.mp3",
-          "F#7": "Fs7.mp3",
+          A1: 'A1.mp3',
+          A2: 'A2.mp3',
+          A3: 'A3.mp3',
+          A4: 'A4.mp3',
+          A5: 'A5.mp3',
+          A6: 'A6.mp3',
+          A7: 'A7.mp3',
+          C1: 'C1.mp3',
+          C2: 'C2.mp3',
+          C3: 'C3.mp3',
+          C4: 'C4.mp3',
+          C5: 'C5.mp3',
+          C6: 'C6.mp3',
+          C7: 'C7.mp3',
+          'D#1': 'Ds1.mp3',
+          'D#2': 'Ds2.mp3',
+          'D#3': 'Ds3.mp3',
+          'D#4': 'Ds4.mp3',
+          'D#5': 'Ds5.mp3',
+          'D#6': 'Ds6.mp3',
+          'D#7': 'Ds7.mp3',
+          'F#1': 'Fs1.mp3',
+          'F#2': 'Fs2.mp3',
+          'F#3': 'Fs3.mp3',
+          'F#4': 'Fs4.mp3',
+          'F#5': 'Fs5.mp3',
+          'F#6': 'Fs6.mp3',
+          'F#7': 'Fs7.mp3',
         },
-        baseUrl: "https://tonejs.github.io/audio/salamander/",
+        baseUrl: 'https://tonejs.github.io/audio/salamander/',
         onload: () => {
           sampler.current = _sampler;
         },
@@ -89,14 +89,14 @@ export default function Home() {
   yScale.current.domain([playbackPosition, playbackPosition + 5]);
 
   useEffect(() => {
-    if (Tone.Transport.state !== "started" && midiMetadata) {
+    if (Tone.Transport.state !== 'started' && midiMetadata) {
       console.log(midiMetadata);
       midiMetadata?.tracks?.[1]?.notes.forEach((note) => {
-        Tone.Transport.scheduleOnce((time) => {
+        Tone.Transport.schedule((time) => {
           sampler.current.triggerAttackRelease(
             note.name,
             note.duration,
-            "+0.05"
+            '+0.05'
           );
         }, note.time);
       });
@@ -126,7 +126,7 @@ export default function Home() {
     if (isPlaying) {
       Tone.Transport.pause();
     } else {
-      Tone.Transport.start("+0.2");
+      Tone.Transport.start('+0.2');
     }
   }
 
@@ -135,8 +135,8 @@ export default function Home() {
       {midiMetadata ? (
         <>
           <div className={styles.controls}>
-            <button style={{ width: "70px" }} onClick={handlePlayPause}>
-              {isPlaying ? "Pause" : "Play"}
+            <button style={{ width: '70px' }} onClick={handlePlayPause}>
+              {isPlaying ? 'Pause' : 'Play'}
             </button>
             <input
               type="range"
@@ -151,7 +151,7 @@ export default function Home() {
             />
             <span className={styles.timing}>
               {formatDuration(playbackPosition)}
-              {" / "}
+              {' / '}
               {formatDuration(midiMetadata?.tracks?.[1]?.duration)}
             </span>
           </div>
@@ -201,7 +201,7 @@ export default function Home() {
                 height={70}
                 pianoScale={xScale.current}
                 highlightedNotes={
-                  Tone.Transport.state === "started"
+                  Tone.Transport.state === 'started'
                     ? midiMetadata?.tracks?.[1]?.notes
                         .filter(
                           (note) =>
