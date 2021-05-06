@@ -139,6 +139,12 @@ export default function Home({ midiFiles }) {
     }
   }
 
+  function getUserFriendlySongName(midiFile) {
+    const parts = midiFile.split('.');
+    parts.pop();
+    return parts.join('.');
+  }
+
   return (
     <div className={styles.App}>
       {midiMetadata ? (
@@ -148,7 +154,9 @@ export default function Home({ midiFiles }) {
             onChange={(e) => setSelectedMidiFile(e.target.value)}
           >
             {midiFiles.map((midiFile) => (
-              <option value={midiFile}>{midiFile}</option>
+              <option value={midiFile}>
+                {getUserFriendlySongName(midiFile)}
+              </option>
             ))}
           </select>
           <div className={styles.controls}>
