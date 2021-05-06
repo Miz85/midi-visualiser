@@ -204,12 +204,11 @@ export default function Home({ midiFiles }) {
                       key={i}
                       x={x}
                       y={y}
-                      height={height}
+                      height={height - 5}
                       width={width}
                       cornerRadius={3}
                       fill="cyan"
                       shadowColor="cyan"
-                      shadowBlur={20}
                     />
                   );
                 })}
