@@ -209,6 +209,7 @@ export default function Home({ midiFiles }) {
                       cornerRadius={3}
                       fill="cyan"
                       shadowColor="cyan"
+                      shadowBlur={20}
                     />
                   );
                 })}
