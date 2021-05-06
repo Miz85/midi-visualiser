@@ -36,8 +36,10 @@ export default function Home() {
     async function convertMidi() {
       // const midi = await Midi.fromUrl("pachelbels-canon-arranged.mid");
       //const midi = await Midi.fromUrl("Closure.mid");
+      // const midi = await Midi.fromUrl('river-flows-in-you.mid');
+      // const midi = await Midi.fromUrl('poc.mid');
+      // const midi = await Midi.fromUrl('let-her-go.mid');
       const midi = await Midi.fromUrl('24884_Back-to-the-Future.mid');
-      Tone.Transport.bpm.value = 220;
 
       setMidiMetadata(midi);
     }
@@ -45,7 +47,7 @@ export default function Home() {
       if (!synth.current) {
         // synth.current = new Tone.PolySynth().toDestination();
       }
-      const reverb = new Tone.Reverb({ decay: 10, wet: 0.3 }).toDestination();
+      const reverb = new Tone.Reverb({ decay: 10, wet: 0.4 }).toDestination();
       const _sampler = new Tone.Sampler({
         urls: {
           A1: 'A1.mp3',
@@ -86,17 +88,21 @@ export default function Home() {
     }
   }, []);
 
-  yScale.current.domain([playbackPosition, playbackPosition + 5]);
+  yScale.current.domain([playbackPosition, playbackPosition + 3]);
 
   useEffect(() => {
     if (Tone.Transport.state !== 'started' && midiMetadata) {
       console.log(midiMetadata);
-      midiMetadata?.tracks?.[1]?.notes.forEach((note) => {
+      midiMetadata?.tracks?.[1].notes.forEach((note) =>
+        midiMetadata?.tracks?.[0].notes.push(note)
+      );
+      midiMetadata?.tracks?.[0]?.notes.forEach((note) => {
         Tone.Transport.schedule((time) => {
           sampler.current.triggerAttackRelease(
             note.name,
             note.duration,
-            '+0.05'
+            '+0.1',
+            note.velocity
           );
         }, note.time);
       });
@@ -110,6 +116,7 @@ export default function Home() {
     function updatePlaybackPosition() {
       timerId.current = requestAnimationFrame(() => {
         setPlaybackPosition(Tone.Transport.seconds);
+        // if(Tone.Transport.seconds > )
         updatePlaybackPosition();
       });
     }
@@ -126,7 +133,7 @@ export default function Home() {
     if (isPlaying) {
       Tone.Transport.pause();
     } else {
-      Tone.Transport.start('+0.2');
+      Tone.Transport.start('+0.6');
     }
   }
 
@@ -141,7 +148,7 @@ export default function Home() {
             <input
               type="range"
               min={0}
-              max={midiMetadata?.tracks?.[1]?.duration}
+              max={midiMetadata?.tracks?.[0]?.duration}
               value={playbackPosition}
               step={10}
               onChange={(e) => {
@@ -152,24 +159,27 @@ export default function Home() {
             <span className={styles.timing}>
               {formatDuration(playbackPosition)}
               {' / '}
-              {formatDuration(midiMetadata?.tracks?.[1]?.duration)}
+              {formatDuration(midiMetadata?.tracks?.[0]?.duration)}
             </span>
           </div>
 
           <Stage height={trackHeight} width={trackWidth}>
             <Layer>
-              {midiMetadata?.tracks?.[1]?.notes
+              {midiMetadata?.tracks?.[0]?.notes
                 .filter(
                   (note) =>
                     note.time + note.duration > playbackPosition &&
-                    note.time <= playbackPosition + 5
+                    note.time <= playbackPosition + 3
                 )
                 .map((note, i) => {
                   const pianoKey = xScale.current(note.midi);
                   const x = pianoKey?.x ?? 0;
                   const width = pianoKey?.width ?? 0;
-                  const height = note.duration * 80;
-                  const y = yScale.current(note.time) - height - 1;
+                  const height =
+                    yScale.current(note.time) -
+                    yScale.current(note.time + note.duration);
+
+                  const y = yScale.current(note.time) - height;
 
                   return (
                     <Rect
@@ -202,12 +212,12 @@ export default function Home() {
                 pianoScale={xScale.current}
                 highlightedNotes={
                   Tone.Transport.state === 'started'
-                    ? midiMetadata?.tracks?.[1]?.notes
+                    ? midiMetadata?.tracks?.[0]?.notes
                         .filter(
                           (note) =>
                             note.time + note.duration > playbackPosition &&
                             note.time <= playbackPosition &&
-                            note.time <= playbackPosition + 5
+                            note.time <= playbackPosition + 3
                         )
                         .map((note) => note.midi)
                     : []
