@@ -6,6 +6,9 @@ import { scaleLinear } from 'd3-scale';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { scalePiano } from '../lib/piano-scale';
 import { Stage, Layer, Rect, Line } from 'react-konva';
+import { loadSampler } from '../lib/load-sampler';
+import { getFileNameWithoutExtension } from '../lib/get-file-name-without-extension';
+import { useFrame } from '../lib/use-frame';
 
 function formatDurationPart(num) {
   return num < 10 ? `0${num}` : `${num}`;
@@ -30,63 +33,20 @@ export default function Home({ midiFiles }) {
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const xScale = useRef(scalePiano().range([0, trackWidth]));
   const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
-  const synth = useRef();
   const sampler = useRef();
 
   useEffect(() => {
-    console.log('>>>>', midiFiles);
-    async function convertMidi() {
+    async function loadMidiAndSampler() {
       const midi = await Midi.fromUrl(selectedMidiFile);
-
+      if (!sampler.current) {
+        sampler.current = await loadSampler();
+      }
       setMidiMetadata(midi);
     }
     if (typeof window !== 'undefined') {
-      convertMidi();
+      loadMidiAndSampler();
     }
   }, [selectedMidiFile]);
-
-  useEffect(() => {
-    if (!synth.current) {
-      // synth.current = new Tone.PolySynth().toDestination();
-    }
-    const reverb = new Tone.Reverb({ decay: 10, wet: 0.4 }).toDestination();
-    const _sampler = new Tone.Sampler({
-      urls: {
-        A1: 'A1.mp3',
-        A2: 'A2.mp3',
-        A3: 'A3.mp3',
-        A4: 'A4.mp3',
-        A5: 'A5.mp3',
-        A6: 'A6.mp3',
-        A7: 'A7.mp3',
-        C1: 'C1.mp3',
-        C2: 'C2.mp3',
-        C3: 'C3.mp3',
-        C4: 'C4.mp3',
-        C5: 'C5.mp3',
-        C6: 'C6.mp3',
-        C7: 'C7.mp3',
-        'D#1': 'Ds1.mp3',
-        'D#2': 'Ds2.mp3',
-        'D#3': 'Ds3.mp3',
-        'D#4': 'Ds4.mp3',
-        'D#5': 'Ds5.mp3',
-        'D#6': 'Ds6.mp3',
-        'D#7': 'Ds7.mp3',
-        'F#1': 'Fs1.mp3',
-        'F#2': 'Fs2.mp3',
-        'F#3': 'Fs3.mp3',
-        'F#4': 'Fs4.mp3',
-        'F#5': 'Fs5.mp3',
-        'F#6': 'Fs6.mp3',
-        'F#7': 'Fs7.mp3',
-      },
-      baseUrl: 'https://tonejs.github.io/audio/salamander/',
-      onload: () => {
-        sampler.current = _sampler;
-      },
-    }).connect(reverb);
-  }, []);
 
   yScale.current.domain([playbackPosition, playbackPosition + 3]);
 
@@ -114,20 +74,9 @@ export default function Home({ midiFiles }) {
     };
   }, [midiMetadata]);
 
-  useEffect(() => {
-    function updatePlaybackPosition() {
-      timerId.current = requestAnimationFrame(() => {
-        setPlaybackPosition(Tone.Transport.seconds);
-        // if(Tone.Transport.seconds > )
-        updatePlaybackPosition();
-      });
-    }
-    updatePlaybackPosition();
-
-    return () => {
-      cancelAnimationFrame(timerId.current);
-    };
-  }, []);
+  useFrame(() => {
+    setPlaybackPosition(Tone.Transport.seconds);
+  });
 
   async function handlePlayPause() {
     await Tone.start();
@@ -137,12 +86,6 @@ export default function Home({ midiFiles }) {
     } else {
       Tone.Transport.start('+0.6');
     }
-  }
-
-  function getUserFriendlySongName(midiFile) {
-    const parts = midiFile.split('.');
-    parts.pop();
-    return parts.join('.');
   }
 
   return (
@@ -155,7 +98,7 @@ export default function Home({ midiFiles }) {
           >
             {midiFiles.map((midiFile) => (
               <option value={midiFile}>
-                {getUserFriendlySongName(midiFile)}
+                {getFileNameWithoutExtension(midiFile)}
               </option>
             ))}
           </select>
