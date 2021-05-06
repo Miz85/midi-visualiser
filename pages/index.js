@@ -1,7 +1,7 @@
 import styles from './index.module.css';
 import { Midi } from '@tonejs/midi';
 import * as Tone from 'tone';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { scaleLinear } from 'd3-scale';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { scalePiano } from '../lib/piano-scale';
@@ -22,8 +22,9 @@ function formatDuration(nbSeconds) {
 const trackHeight = 600;
 const trackWidth = 800;
 
-export default function Home() {
+export default function Home({ midiFiles }) {
   const [midiMetadata, setMidiMetadata] = useState();
+  const [selectedMidiFile, setSelectedMidiFile] = React.useState(midiFiles[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const timerId = useRef();
   const [playbackPosition, setPlaybackPosition] = useState(0);
@@ -33,59 +34,58 @@ export default function Home() {
   const sampler = useRef();
 
   useEffect(() => {
+    console.log('>>>>', midiFiles);
     async function convertMidi() {
-      // const midi = await Midi.fromUrl("pachelbels-canon-arranged.mid");
-      //const midi = await Midi.fromUrl("Closure.mid");
-      // const midi = await Midi.fromUrl('river-flows-in-you.mid');
-      // const midi = await Midi.fromUrl('poc.mid');
-      // const midi = await Midi.fromUrl('let-her-go.mid');
-      const midi = await Midi.fromUrl('24884_Back-to-the-Future.mid');
+      const midi = await Midi.fromUrl(selectedMidiFile);
 
       setMidiMetadata(midi);
     }
-    if (!midiMetadata && typeof window !== 'undefined') {
-      if (!synth.current) {
-        // synth.current = new Tone.PolySynth().toDestination();
-      }
-      const reverb = new Tone.Reverb({ decay: 10, wet: 0.4 }).toDestination();
-      const _sampler = new Tone.Sampler({
-        urls: {
-          A1: 'A1.mp3',
-          A2: 'A2.mp3',
-          A3: 'A3.mp3',
-          A4: 'A4.mp3',
-          A5: 'A5.mp3',
-          A6: 'A6.mp3',
-          A7: 'A7.mp3',
-          C1: 'C1.mp3',
-          C2: 'C2.mp3',
-          C3: 'C3.mp3',
-          C4: 'C4.mp3',
-          C5: 'C5.mp3',
-          C6: 'C6.mp3',
-          C7: 'C7.mp3',
-          'D#1': 'Ds1.mp3',
-          'D#2': 'Ds2.mp3',
-          'D#3': 'Ds3.mp3',
-          'D#4': 'Ds4.mp3',
-          'D#5': 'Ds5.mp3',
-          'D#6': 'Ds6.mp3',
-          'D#7': 'Ds7.mp3',
-          'F#1': 'Fs1.mp3',
-          'F#2': 'Fs2.mp3',
-          'F#3': 'Fs3.mp3',
-          'F#4': 'Fs4.mp3',
-          'F#5': 'Fs5.mp3',
-          'F#6': 'Fs6.mp3',
-          'F#7': 'Fs7.mp3',
-        },
-        baseUrl: 'https://tonejs.github.io/audio/salamander/',
-        onload: () => {
-          sampler.current = _sampler;
-        },
-      }).connect(reverb);
+    if (typeof window !== 'undefined') {
       convertMidi();
     }
+  }, [selectedMidiFile]);
+
+  useEffect(() => {
+    if (!synth.current) {
+      // synth.current = new Tone.PolySynth().toDestination();
+    }
+    const reverb = new Tone.Reverb({ decay: 10, wet: 0.4 }).toDestination();
+    const _sampler = new Tone.Sampler({
+      urls: {
+        A1: 'A1.mp3',
+        A2: 'A2.mp3',
+        A3: 'A3.mp3',
+        A4: 'A4.mp3',
+        A5: 'A5.mp3',
+        A6: 'A6.mp3',
+        A7: 'A7.mp3',
+        C1: 'C1.mp3',
+        C2: 'C2.mp3',
+        C3: 'C3.mp3',
+        C4: 'C4.mp3',
+        C5: 'C5.mp3',
+        C6: 'C6.mp3',
+        C7: 'C7.mp3',
+        'D#1': 'Ds1.mp3',
+        'D#2': 'Ds2.mp3',
+        'D#3': 'Ds3.mp3',
+        'D#4': 'Ds4.mp3',
+        'D#5': 'Ds5.mp3',
+        'D#6': 'Ds6.mp3',
+        'D#7': 'Ds7.mp3',
+        'F#1': 'Fs1.mp3',
+        'F#2': 'Fs2.mp3',
+        'F#3': 'Fs3.mp3',
+        'F#4': 'Fs4.mp3',
+        'F#5': 'Fs5.mp3',
+        'F#6': 'Fs6.mp3',
+        'F#7': 'Fs7.mp3',
+      },
+      baseUrl: 'https://tonejs.github.io/audio/salamander/',
+      onload: () => {
+        sampler.current = _sampler;
+      },
+    }).connect(reverb);
   }, []);
 
   yScale.current.domain([playbackPosition, playbackPosition + 3]);
@@ -93,6 +93,8 @@ export default function Home() {
   useEffect(() => {
     if (Tone.Transport.state !== 'started' && midiMetadata) {
       console.log(midiMetadata);
+      Tone.Transport.cancel();
+      setIsPlaying(false);
       midiMetadata?.tracks?.[1].notes.forEach((note) =>
         midiMetadata?.tracks?.[0].notes.push(note)
       );
@@ -141,6 +143,14 @@ export default function Home() {
     <div className={styles.App}>
       {midiMetadata ? (
         <>
+          <select
+            value={selectedMidiFile}
+            onChange={(e) => setSelectedMidiFile(e.target.value)}
+          >
+            {midiFiles.map((midiFile) => (
+              <option value={midiFile}>{midiFile}</option>
+            ))}
+          </select>
           <div className={styles.controls}>
             <button style={{ width: '70px' }} onClick={handlePlayPause}>
               {isPlaying ? 'Pause' : 'Play'}
@@ -229,4 +239,12 @@ export default function Home() {
       ) : null}
     </div>
   );
+}
+
+export async function getStaticProps() {
+  const path = require('path');
+  const fs = require('fs');
+
+  const publicFolderPath = path.resolve('public');
+  return { props: { midiFiles: fs.readdirSync(publicFolderPath) } };
 }
