@@ -1,6 +1,6 @@
 import * as Tone from 'tone';
 
-export const loadSampler = () => {
+export const loadSampler = (): Promise<Tone.Sampler> => {
   return new Promise((resolve) => {
     const reverb = new Tone.Reverb({ decay: 10, wet: 0.4 }).toDestination();
     const _sampler = new Tone.Sampler({

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import React, { KeyboardEventHandler, useEffect, useRef } from 'react';
 
 export function useFrame(cb) {
-  const animationFrameId = useRef();
+  const animationFrameId = useRef<number>();
 
   useEffect(() => {
     function updateFrame() {
@@ -14,7 +14,7 @@ export function useFrame(cb) {
       cancelAnimationFrame(animationFrameId.current);
       animationFrameId.current = null;
     }
-    function onKeyDown(event) {
+    function onKeyDown(this: Window, event: KeyboardEvent) {
       if (event.key === 's') {
         stopLoop();
       }

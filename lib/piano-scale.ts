@@ -1,10 +1,33 @@
-import { getNoteName, getNoteOctave } from "../lib/notes";
+import { getNoteName, getNoteOctave } from './notes';
 
 // A piano has 88 keys ranging from A-1(9) to C7(96)
 const firstNoteMidiCode = 9;
 const lastNoteMidiCode = 96;
 
-const pianoKeys = new Array(lastNoteMidiCode - firstNoteMidiCode + 1)
+interface PianoKey {
+  isWhite: boolean;
+  midiCode: number;
+  noteName: string;
+  noteOctave: number;
+  x?: number;
+  y?: number;
+  width?: number;
+}
+
+type Range = [number, number];
+
+export interface ScalePiano {
+  (midiCode: number): PianoKey;
+  domain(): [number, number];
+  range(range: Range): this;
+  pianoKeys(): PianoKey[];
+  whiteKeys(): PianoKey[];
+  blackKeys(): PianoKey[];
+}
+
+const pianoKeys: PianoKey[] = new Array(
+  lastNoteMidiCode - firstNoteMidiCode + 1
+)
   .fill(0)
   .map((_, i) => {
     return {
@@ -15,19 +38,17 @@ const pianoKeys = new Array(lastNoteMidiCode - firstNoteMidiCode + 1)
     };
   });
 
-function isWhiteKey(midiCode) {
+function isWhiteKey(midiCode: number) {
   return [0, 2, 4, 5, 7, 9, 11].includes(midiCode % 12);
 }
 
 const whiteKeys = pianoKeys.filter((pianoKey) => pianoKey.isWhite);
 const blackKeys = pianoKeys.filter((pianoKey) => !pianoKey.isWhite);
 
-export function scalePiano(range) {
-  let _domain = [firstNoteMidiCode, lastNoteMidiCode];
-  let _range = range;
-  let _midiCodeKeyMap = {};
-
-  let midiCodeKeyMap = {};
+export function scalePiano(range?: Range): ScalePiano {
+  let _domain: [number, number] = [firstNoteMidiCode, lastNoteMidiCode];
+  let _range: Range = range;
+  let _midiCodeKeyMap: { [midiCode: number]: PianoKey } = {};
 
   function computeKeysPositions() {
     const whiteKeysWidth = _range
@@ -45,7 +66,7 @@ export function scalePiano(range) {
       };
     });
 
-    blackKeys.forEach((blackKey, i) => {
+    blackKeys.forEach((blackKey) => {
       const previousWhiteKeyIndex = whiteKeys.findIndex(
         (key) => key.midiCode === blackKey.midiCode - 1
       );
@@ -62,7 +83,7 @@ export function scalePiano(range) {
   }
   computeKeysPositions();
 
-  function scale(midiCode) {
+  function scale(midiCode: number) {
     if (midiCode < 9 || midiCode > 96) {
       console.error(
         `MIDI code ${midiCode} is not a valid piano note. Piano notes should be between A-1(9) and C7(96)`
@@ -73,10 +94,7 @@ export function scalePiano(range) {
 
   scale.domain = () => _domain;
 
-  scale.range = (newRange) => {
-    if (!newRange) {
-      return _range;
-    }
+  scale.range = (newRange: Range) => {
     _range = newRange;
     computeKeysPositions();
 

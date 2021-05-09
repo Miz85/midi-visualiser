@@ -5,35 +5,27 @@ import React, { useEffect, useState, useRef } from 'react';
 import { scaleLinear } from 'd3-scale';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { scalePiano } from '../lib/piano-scale';
-import { Stage, Layer, Rect, Line } from 'react-konva';
+import { Stage, Layer, Rect } from 'react-konva';
 import { loadSampler } from '../lib/load-sampler';
 import { getFileNameWithoutExtension } from '../lib/get-file-name-without-extension';
 import { useFrame } from '../lib/use-frame';
-
-function formatDurationPart(num) {
-  return num < 10 ? `0${num}` : `${num}`;
-}
-function formatDuration(nbSeconds) {
-  const minutes = Math.floor(nbSeconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const seconds = Math.round((nbSeconds / 60 - minutes) * 60);
-  return `${formatDurationPart(hours)}:${formatDurationPart(
-    minutes
-  )}:${formatDurationPart(seconds)}`;
-}
+import { Select } from '../components/Select';
+import { formatDuration } from '../lib/format-duration';
 
 const trackHeight = 600;
 const trackWidth = 800;
 
-export default function Home({ midiFiles }) {
-  const [midiMetadata, setMidiMetadata] = useState();
+interface HomeProps {
+  midiFiles: string[];
+}
+export default function Home({ midiFiles }: HomeProps) {
+  const [midiMetadata, setMidiMetadata] = useState<Midi>();
   const [selectedMidiFile, setSelectedMidiFile] = React.useState(midiFiles[0]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const timerId = useRef();
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const xScale = useRef(scalePiano().range([0, trackWidth]));
   const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
-  const sampler = useRef();
+  const sampler = useRef<Tone.Sampler>();
 
   useEffect(() => {
     async function loadMidiAndSampler() {
@@ -59,8 +51,8 @@ export default function Home({ midiFiles }) {
         midiMetadata?.tracks?.[0].notes.push(note)
       );
       midiMetadata?.tracks?.[0]?.notes.forEach((note) => {
-        Tone.Transport.schedule((time) => {
-          sampler.current.triggerAttackRelease(
+        Tone.Transport.schedule(() => {
+          sampler?.current?.triggerAttackRelease(
             note.name,
             note.duration,
             '+0.1',
@@ -92,18 +84,16 @@ export default function Home({ midiFiles }) {
     <div className={styles.App}>
       {midiMetadata ? (
         <>
-          <select
+          <Select
+            options={midiFiles.map((fileName) => ({
+              value: fileName,
+              label: getFileNameWithoutExtension(fileName),
+            }))}
             value={selectedMidiFile}
-            onChange={(e) => setSelectedMidiFile(e.target.value)}
-          >
-            {midiFiles.map((midiFile) => (
-              <option value={midiFile}>
-                {getFileNameWithoutExtension(midiFile)}
-              </option>
-            ))}
-          </select>
+            onChange={(newValue) => setSelectedMidiFile(newValue)}
+          ></Select>
           <div className={styles.controls}>
-            <button style={{ width: '70px' }} onClick={handlePlayPause}>
+            <button onClick={handlePlayPause}>
               {isPlaying ? 'Pause' : 'Play'}
             </button>
             <input
@@ -113,8 +103,8 @@ export default function Home({ midiFiles }) {
               value={playbackPosition}
               step={10}
               onChange={(e) => {
-                setPlaybackPosition(e.target.value);
-                Tone.Transport.seconds = e.target.value;
+                setPlaybackPosition(Number(e.target.value));
+                Tone.Transport.seconds = Number(e.target.value);
               }}
             />
             <span className={styles.timing}>
