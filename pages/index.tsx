@@ -26,6 +26,7 @@ export default function Home({ midiFiles }: HomeProps) {
   const xScale = useRef(scalePiano().range([0, trackWidth]));
   const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
   const sampler = useRef<Tone.Sampler>();
+  const [color, setColor] = React.useState('#00ffff');
 
   useEffect(() => {
     async function loadMidiAndSampler() {
@@ -84,14 +85,22 @@ export default function Home({ midiFiles }: HomeProps) {
     <div className={styles.App}>
       {midiMetadata ? (
         <>
-          <Select
-            options={midiFiles.map((fileName) => ({
-              value: fileName,
-              label: getFileNameWithoutExtension(fileName),
-            }))}
-            value={selectedMidiFile}
-            onChange={(newValue) => setSelectedMidiFile(newValue)}
-          ></Select>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Select
+              options={midiFiles.map((fileName) => ({
+                value: fileName,
+                label: getFileNameWithoutExtension(fileName),
+              }))}
+              value={selectedMidiFile}
+              onChange={(newValue) => setSelectedMidiFile(newValue)}
+            ></Select>
+            <input
+              style={{ marginLeft: '10px' }}
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            />
+          </div>
           <div className={styles.controls}>
             <button onClick={handlePlayPause}>
               {isPlaying ? 'Pause' : 'Play'}
@@ -140,8 +149,8 @@ export default function Home({ midiFiles }: HomeProps) {
                       height={height - 5}
                       width={width}
                       cornerRadius={3}
-                      fill="cyan"
-                      shadowColor="cyan"
+                      fill={color}
+                      shadowColor={color}
                       shadowBlur={20}
                     />
                   );
@@ -151,8 +160,8 @@ export default function Home({ midiFiles }: HomeProps) {
                 y={trackHeight - 72}
                 height={10}
                 width={trackWidth}
-                fill="cyan"
-                shadowColor="cyan"
+                fill={color}
+                shadowColor={color}
                 shadowBlur={20}
                 cornerRadius={3}
               ></Rect>
