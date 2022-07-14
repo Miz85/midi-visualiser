@@ -1,16 +1,16 @@
-import styles from './index.module.css';
-import { Midi } from '@tonejs/midi';
-import * as Tone from 'tone';
-import React, { useEffect, useState, useRef } from 'react';
-import { scaleLinear } from 'd3-scale';
-import { PianoKeyboard } from '../components/PianoKeyboard';
-import { scalePiano } from '../lib/piano-scale';
-import { Stage, Layer, Rect } from 'react-konva';
-import { loadSampler } from '../lib/load-sampler';
-import { getFileNameWithoutExtension } from '../lib/get-file-name-without-extension';
-import { useFrame } from '../lib/use-frame';
-import { Select } from '../components/Select';
-import { formatDuration } from '../lib/format-duration';
+import styles from "./index.module.css";
+import * as Tone from "tone";
+import React, { useEffect, useState, useRef } from "react";
+import { scaleLinear } from "d3-scale";
+import { PianoKeyboard } from "../components/PianoKeyboard";
+import { scalePiano } from "../lib/piano-scale";
+import { Stage, Layer, Rect } from "react-konva";
+import { loadSampler } from "../lib/load-sampler";
+import { getFileNameWithoutExtension } from "../lib/get-file-name-without-extension";
+import { useFrame } from "../lib/use-frame";
+import { Select } from "../components/Select";
+import { formatDuration } from "../lib/format-duration";
+import { useMidiMetadata } from "../lib/hooks/use-midi-metadata";
 
 const trackHeight = 600;
 const trackWidth = 800;
@@ -18,36 +18,31 @@ const trackWidth = 800;
 interface HomeProps {
   midiFiles: string[];
 }
+
 export default function Home({ midiFiles }: HomeProps) {
-  const [midiMetadata, setMidiMetadata] = useState<Midi>();
   const [selectedMidiFile, setSelectedMidiFile] = React.useState(midiFiles[0]);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const midiMetadata = useMidiMetadata(selectedMidiFile);
+  const isPlaying = React.useMemo(() => {
+    return Tone.Transport.state === "started";
+  }, [Tone.Transport.state]);
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const xScale = useRef(scalePiano().range([0, trackWidth]));
   const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
   const sampler = useRef<Tone.Sampler>();
-  const [color, setColor] = React.useState('#00ffff');
+  const [color, setColor] = React.useState("#00ffff");
 
   useEffect(() => {
-    async function loadMidiAndSampler() {
-      const midi = await Midi.fromUrl(selectedMidiFile);
-      if (!sampler.current) {
-        sampler.current = await loadSampler();
-      }
-      setMidiMetadata(midi);
+    if (!sampler.current) {
+      loadSampler().then((newSampler) => (sampler.current = newSampler));
     }
-    if (typeof window !== 'undefined') {
-      loadMidiAndSampler();
-    }
-  }, [selectedMidiFile]);
+  }, []);
 
   yScale.current.domain([playbackPosition, playbackPosition + 3]);
 
   useEffect(() => {
-    if (Tone.Transport.state !== 'started' && midiMetadata) {
+    if (!isPlaying && midiMetadata) {
       console.log(midiMetadata);
       Tone.Transport.cancel();
-      setIsPlaying(false);
       midiMetadata?.tracks?.[1].notes.forEach((note) =>
         midiMetadata?.tracks?.[0].notes.push(note)
       );
@@ -56,7 +51,7 @@ export default function Home({ midiFiles }: HomeProps) {
           sampler?.current?.triggerAttackRelease(
             note.name,
             note.duration,
-            '+0.1',
+            "+0.1",
             note.velocity
           );
         }, note.time);
@@ -72,12 +67,10 @@ export default function Home({ midiFiles }: HomeProps) {
   });
 
   async function handlePlayPause() {
-    await Tone.start();
-    setIsPlaying((current) => !current);
     if (isPlaying) {
       Tone.Transport.pause();
     } else {
-      Tone.Transport.start('+0.6');
+      Tone.Transport.start("+0.6");
     }
   }
 
@@ -85,7 +78,7 @@ export default function Home({ midiFiles }: HomeProps) {
     <div className={styles.App}>
       {midiMetadata ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className={styles.options}>
             <Select
               options={midiFiles.map((fileName) => ({
                 value: fileName,
@@ -95,15 +88,15 @@ export default function Home({ midiFiles }: HomeProps) {
               onChange={(newValue) => setSelectedMidiFile(newValue)}
             ></Select>
             <input
-              style={{ marginLeft: '10px' }}
+              style={{ marginLeft: "10px" }}
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
             />
           </div>
-          <div className={styles.controls}>
+          <div className={styles["playback-controls"]}>
             <button onClick={handlePlayPause}>
-              {isPlaying ? 'Pause' : 'Play'}
+              {isPlaying ? "Pause" : "Play"}
             </button>
             <input
               type="range"
@@ -118,7 +111,7 @@ export default function Home({ midiFiles }: HomeProps) {
             />
             <span className={styles.timing}>
               {formatDuration(playbackPosition)}
-              {' / '}
+              {" / "}
               {formatDuration(midiMetadata?.tracks?.[0]?.duration)}
             </span>
           </div>
@@ -171,7 +164,7 @@ export default function Home({ midiFiles }: HomeProps) {
                 height={70}
                 pianoScale={xScale.current}
                 highlightedNotes={
-                  Tone.Transport.state === 'started'
+                  isPlaying
                     ? midiMetadata?.tracks?.[0]?.notes
                         .filter(
                           (note) =>
@@ -192,9 +185,9 @@ export default function Home({ midiFiles }: HomeProps) {
 }
 
 export async function getStaticProps() {
-  const path = require('path');
-  const fs = require('fs');
+  const path = require("path");
+  const fs = require("fs");
 
-  const publicFolderPath = path.resolve('public');
+  const publicFolderPath = path.resolve("public");
   return { props: { midiFiles: fs.readdirSync(publicFolderPath) } };
 }
