@@ -9,13 +9,18 @@
   min-width: 800px;
 }
 
-.controls {
+.options {
+  display: flex;
+  align-items: center;
+}
+
+.playback-controls {
   margin: 20px;
   display: flex;
   align-items: center;
 }
 
-.controls button {
+.playback-controls button {
   width: 70px;
   margin-right: 15px;
 }
