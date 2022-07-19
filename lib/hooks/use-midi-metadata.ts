@@ -1,5 +1,5 @@
 import { Midi } from "@tonejs/midi";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /**
  * Uses ToneJS to parse the midi file metadata into a json format
@@ -18,5 +18,12 @@ export const useMidiMetadata = (midiFilePath: string) => {
     }
   }, [midiFilePath]);
 
-  return midiMetadata;
+  const notes = useMemo(() => {
+    return [
+      ...(midiMetadata?.tracks?.[0].notes ?? []),
+      ...(midiMetadata?.tracks?.[1].notes ?? []),
+    ];
+  }, [midiMetadata]);
+
+  return { notes, duration: midiMetadata?.tracks?.[0].duration ?? 0 };
 };

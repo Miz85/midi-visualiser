@@ -1,6 +1,6 @@
-import React, { KeyboardEventHandler, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-export function useFrame(cb) {
+export function useFrame(cb: Function) {
   const animationFrameId = useRef<number>();
 
   useEffect(() => {

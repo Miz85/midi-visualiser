@@ -4,11 +4,11 @@ export const PianoKeyboard = ({
   y,
   height,
   pianoScale,
-  highlightedNotes
+  highlightedNotes,
 }) => {
   return (
     <Group x={x} y={y}>
-      {pianoScale.whiteKeys().map((whiteKey, i) => {
+      {pianoScale.whiteKeys().map((whiteKey) => {
         return (
           <Group key={whiteKey.midiCode} x={whiteKey.x} y={0}>
             <Rect
