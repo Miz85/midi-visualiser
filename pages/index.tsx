@@ -1,6 +1,6 @@
 import styles from "./index.module.css";
 import * as Tone from "tone";
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { scaleLinear } from "d3-scale";
 import { PianoKeyboard } from "../components/PianoKeyboard";
 import { scalePiano } from "../lib/piano-scale";
@@ -14,6 +14,8 @@ import { useScheduleNotes } from "../lib/hooks/use-schedule-notes";
 
 const trackHeight = 600;
 const trackWidth = 800;
+const xScale = scalePiano().range([0, trackWidth]);
+const yScale = scaleLinear().range([trackHeight - 70, 0]);
 
 interface HomeProps {
   midiFiles: string[];
@@ -26,19 +28,21 @@ export default function Home({ midiFiles }: HomeProps) {
     return Tone.Transport.state === "started";
   }, [Tone.Transport.state]);
   const [playbackPosition, setPlaybackPosition] = useState(0);
-  const xScale = useRef(scalePiano().range([0, trackWidth]));
-  const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
+
   const [color, setColor] = React.useState("#00ffff");
 
-  yScale.current.domain([playbackPosition, playbackPosition + 3]);
+  yScale.domain([playbackPosition, playbackPosition + 3]);
 
   useScheduleNotes(notes);
+
+  React.useEffect(() => {}, []);
 
   useFrame(() => {
     setPlaybackPosition(Tone.Transport.seconds);
   });
 
   async function handlePlayPause() {
+    await Tone.start();
     if (isPlaying) {
       Tone.Transport.pause();
     } else {
@@ -47,7 +51,7 @@ export default function Home({ midiFiles }: HomeProps) {
   }
 
   const notesInScene = useMemo(() => {
-    return notes.filter(
+    return notes?.filter(
       (note) =>
         note.time + note.duration > playbackPosition &&
         // Arbitrarily choosing a 3s time window at a time
@@ -56,7 +60,7 @@ export default function Home({ midiFiles }: HomeProps) {
   }, [notes, playbackPosition]);
 
   const notesPlaying = useMemo(() => {
-    return notesInScene.filter((note) => note.time <= playbackPosition);
+    return notesInScene?.filter((note) => note.time <= playbackPosition);
   }, [notesInScene]);
   return (
     <div className={styles.App}>
@@ -103,14 +107,13 @@ export default function Home({ midiFiles }: HomeProps) {
           <Stage height={trackHeight} width={trackWidth}>
             <Layer>
               {notesInScene.map((note, i) => {
-                const pianoKey = xScale.current(note.midi);
+                const pianoKey = xScale(note.midi);
                 const x = pianoKey?.x ?? 0;
                 const width = pianoKey?.width ?? 0;
                 const height =
-                  yScale.current(note.time) -
-                  yScale.current(note.time + note.duration);
+                  yScale(note.time) - yScale(note.time + note.duration);
 
-                const y = yScale.current(note.time) - height;
+                const y = yScale(note.time) - height;
 
                 return (
                   <Rect
@@ -140,7 +143,7 @@ export default function Home({ midiFiles }: HomeProps) {
                 x={0}
                 y={trackHeight - 70}
                 height={70}
-                pianoScale={xScale.current}
+                pianoScale={xScale}
                 highlightedNotes={
                   isPlaying ? notesPlaying.map((note) => note.midi) : []
                 }

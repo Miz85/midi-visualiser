@@ -1,4 +1,4 @@
-import { getNoteName, getNoteOctave } from './notes';
+import { getNoteName, getNoteOctave } from "./notes";
 
 // A piano has 88 keys ranging from A-1(9) to C7(96)
 const firstNoteMidiCode = 9;
@@ -46,6 +46,7 @@ const whiteKeys = pianoKeys.filter((pianoKey) => pianoKey.isWhite);
 const blackKeys = pianoKeys.filter((pianoKey) => !pianoKey.isWhite);
 
 export function scalePiano(range?: Range): ScalePiano {
+  console.log(">>> scalePiano");
   let _domain: [number, number] = [firstNoteMidiCode, lastNoteMidiCode];
   let _range: Range = range;
   let _midiCodeKeyMap: { [midiCode: number]: PianoKey } = {};

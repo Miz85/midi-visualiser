@@ -19,10 +19,9 @@ export const useMidiMetadata = (midiFilePath: string) => {
   }, [midiFilePath]);
 
   const notes = useMemo(() => {
-    return [
-      ...(midiMetadata?.tracks?.[0].notes ?? []),
-      ...(midiMetadata?.tracks?.[1].notes ?? []),
-    ];
+    return midiMetadata?.tracks
+      .filter((track) => track.instrument.family === "piano")
+      .flatMap((track) => track.notes);
   }, [midiMetadata]);
 
   return { notes, duration: midiMetadata?.tracks?.[0].duration ?? 0 };
