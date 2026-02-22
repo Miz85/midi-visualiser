@@ -1,7 +1,7 @@
 import React, { KeyboardEventHandler, useEffect, useRef } from 'react';
 
 export function useFrame(cb) {
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | null>(null);
 
   useEffect(() => {
     function updateFrame() {

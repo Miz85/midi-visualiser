@@ -44,7 +44,7 @@ export default function Home() {
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const xScale = useRef(scalePiano().range([0, trackWidth]));
   const yScale = useRef(scaleLinear().range([trackHeight - 70, 0]));
-  const sampler = useRef<Tone.Sampler>();
+  const sampler = useRef<Tone.Sampler>(null);
   const [color, setColor] = React.useState("#00ffff");
 
   useEffect(() => {
