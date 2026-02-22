@@ -2,35 +2,35 @@
   "name": "midi-visualiser",
   "version": "1.0.0",
   "scripts": {
-    "dev": "./node_modules/.bin/next",
-    "build": "./node_modules/.bin/next build",
-    "start": "./node_modules/.bin/next start"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/instrumentation": "^0.57.1",
-    "@opentelemetry/resources": "^1.30.1",
-    "@opentelemetry/sdk-trace-node": "^1.30.1",
-    "@opentelemetry/semantic-conventions": "^1.28.0",
+    "@opentelemetry/instrumentation": "^0.212.0",
+    "@opentelemetry/resources": "^2.5.1",
+    "@opentelemetry/sdk-trace-node": "^2.5.1",
+    "@opentelemetry/semantic-conventions": "^1.39.0",
     "@tonejs/piano": "^0.2.1",
-    "canvas": "^3.1.0",
+    "canvas": "^3.2.1",
     "d3-scale": "4.0.2",
-    "konva": "9.3.18",
-    "next": "^15.1.6",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "react-konva": "19.0.2",
-    "react-scan": "^0.1.1",
-    "tone": "15.0.4",
-    "webmidi": "^3.1.12"
+    "konva": "10.2.0",
+    "next": "^16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-konva": "19.2.2",
+    "react-scan": "^0.5.3",
+    "tone": "15.1.22",
+    "webmidi": "^3.1.14"
   },
   "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@tonejs/midi": "2.0.28",
-    "@types/d3-scale": "^4.0.8",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "typescript": "^5.7.3"
+    "@types/d3-scale": "^4.0.9",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
   }
 }
